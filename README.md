@@ -1,2 +1,2 @@
 # Cortex
-A wrapper.
+A Python based wrapper.
