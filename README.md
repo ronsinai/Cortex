@@ -1,2 +1,2 @@
 # Cortex
-A wrapper.
+A Node.JS based wrapper.
