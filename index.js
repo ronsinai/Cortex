@@ -7,8 +7,10 @@ Nconf.argv().env().defaults({
   LOG_LEVEL: 'info',
   ELEF_URI: 'http://localhost:1995',
   AMQP_URI: 'amqp://localhost:5672',
+  AMQP_EXCHANGE: 'imagings',
+  AMQP_EXCHANGE_TYPE: 'topic',
   AMQP_QUEUE: 'syringomyelia',
-});
+}).file({ file: './config.json' });
 
 const App = require('./app');
 

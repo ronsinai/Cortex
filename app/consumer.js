@@ -20,11 +20,17 @@ class App {
   // eslint-disable-next-line class-methods-use-this
   async _connectToMQ() {
     await MQ.connect(Nconf.get('AMQP_URI'));
+    await MQ.assertExchange(Nconf.get('AMQP_EXCHANGE'), Nconf.get('AMQP_EXCHANGE_TYPE'));
     await MQ.assertQueue(Nconf.get('AMQP_QUEUE'));
+    await MQ.bindQueue(Nconf.get('AMQP_QUEUE'), Nconf.get('AMQP_EXCHANGE'), Nconf.get('patterns'));
     logger.info(`Cortex : connected to rabbitmq at ${Nconf.get('AMQP_URI')}`);
 
     this.mq = new MQOperations(Nconf.get('AMQP_QUEUE'));
-    logger.info(`Cortex : consuming from ${Nconf.get('AMQP_QUEUE')} queue`);
+    logger.info(
+      `Cortex : consuming from ${Nconf.get('AMQP_EXCHANGE')} exchange `
+      + `through ${Nconf.get('AMQP_QUEUE')} queue `
+      + `with patterns: ['${Nconf.get('patterns').join("', '")}']`,
+    );
     await this.mq.consume();
   }
 
