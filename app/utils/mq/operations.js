@@ -1,8 +1,11 @@
 const Joi = require('joi');
 
 const Algorithm = require('../../algorithm');
+const { getLogger } = require('../logger');
 const { getMQ } = require('.');
 const { imagingSchema } = require('../../schemas');
+
+const logger = getLogger();
 
 class MQOperations {
   constructor(inQueue) {
@@ -22,16 +25,16 @@ class MQOperations {
     try {
       imaging = JSON.parse(msg.content.toString());
       Joi.assert(imaging, imagingSchema);
-      console.info(`Consumed imaging ${imaging._id}`);
+      logger.info(`Consumed imaging ${imaging._id}`);
 
       this.algorithm.run(imaging);
       this.channel.ack(msg);
-      console.info(`Acked imaging ${imaging._id}`);
+      logger.info(`Acked imaging ${imaging._id}`);
     }
     catch (err) {
-      console.error(err);
+      logger.error(err);
       this.channel.reject(msg, this.REQUEUE_ON_REJECT);
-      console.error(`Rejected imaging ${imaging._id} with requeue=${this.REQUEUE_ON_REJECT}`);
+      logger.error(`Rejected imaging ${imaging._id} with requeue=${this.REQUEUE_ON_REJECT}`);
     }
   }
 

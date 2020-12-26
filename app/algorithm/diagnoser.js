@@ -1,7 +1,10 @@
 const Joi = require('joi');
 const Nconf = require('nconf');
 
+const { getLogger } = require('../utils/logger');
 const { imagingSchema } = require('../schemas');
+
+const logger = getLogger();
 
 class Diagnoser {
   // eslint-disable-next-line class-methods-use-this
@@ -11,14 +14,14 @@ class Diagnoser {
       // eslint-disable-next-line object-curly-newline
       const { _id, type, bodyPart, metadata, path } = imaging;
       const { age, sex } = metadata;
-      console.info(`Diagnosing imaging ${_id} of ${bodyPart} ${type} of ${age}y ${sex} at ${path}`);
+      logger.info(`Diagnosing imaging ${_id} of ${bodyPart} ${type} of ${age}y ${sex} at ${path}`);
 
       const diagnosis = { imagingId: _id, imagingType: type, diagnosis: Nconf.get('AMQP_QUEUE') };
-      console.info(`Diagnosed imaging ${_id} with ${Nconf.get('AMQP_QUEUE')}`);
+      logger.info(`Diagnosed imaging ${_id} with ${Nconf.get('AMQP_QUEUE')}`);
       return diagnosis;
     }
     catch (err) {
-      console.error(`Failed to diagnose imaging ${imaging._id}`);
+      logger.error(`Failed to diagnose imaging ${imaging._id}`);
       throw err;
     }
   }
