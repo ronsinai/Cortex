@@ -9,3 +9,6 @@
 **/.editorconfig
 **/.aws
 **/dist
+
+**/__pycache__/
+**/*.pyc
