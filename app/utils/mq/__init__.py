@@ -13,8 +13,15 @@ def connect(url):
 
     return channel
 
+def assert_exchange(exchange, exchange_type):
+    channel.exchange_declare(exchange=exchange, exchange_type=exchange_type, durable=DURABLE)
+
 def assert_queue(queue):
     channel.queue_declare(queue=queue, durable=DURABLE)
+
+def bind_queue(queue, exchange, patterns):
+    for pattern in patterns:
+        channel.queue_bind(queue=queue, exchange=exchange, routing_key=pattern)
 
 def close():
     if channel:

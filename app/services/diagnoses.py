@@ -25,7 +25,7 @@ class DiagnosesService:
             )
 
         except Exception as err:
-            logger.info(
+            logger.error(
                 f"Failed to post {diagnosis.get('diagnosis')} diagnosis of "
                 f"imaging {diagnosis.get('imagingId')} to 1000",
             )
