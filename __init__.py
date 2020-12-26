@@ -3,7 +3,7 @@ from pconf import Pconf
 Pconf.env()
 Pconf.defaults({
     'PYTHON_ENV': 'dev',
-    'LOG_LEVEL': 'INFO',
+    'LOG_LEVEL': 'info',
     'AMQP_URI': 'amqp://localhost:5672',
     'AMQP_QUEUE': 'syringomyelia',
 })
