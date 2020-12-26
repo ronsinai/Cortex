@@ -4,6 +4,7 @@ Pconf.env()
 Pconf.defaults({
     'PYTHON_ENV': 'dev',
     'LOG_LEVEL': 'info',
+    'ELEF_URI': 'http://localhost:1995',
     'AMQP_URI': 'amqp://localhost:5672',
     'AMQP_QUEUE': 'syringomyelia',
 })
