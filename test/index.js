@@ -4,6 +4,7 @@ Nconf.use('memory');
 Nconf.argv().env().defaults({
   NODE_ENV: 'test',
   LOG_LEVEL: 'silent',
+  ELEF_URI: 'http://localhost:1995',
   AMQP_URI: 'amqp://localhost:5672',
   AMQP_QUEUE: 'test_syringomyelia',
 });
