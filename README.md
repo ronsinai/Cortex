@@ -1,2 +1,2 @@
 # Cortex
-A Python based wrapper.
+A Python-MATLAB based wrapper.
