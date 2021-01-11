@@ -1,4 +1,6 @@
 import json
+
+from pconf import Pconf
 import pika
 
 from app.algorithm import Algorithm
@@ -49,7 +51,9 @@ class MQOperations:
         except Exception as err: # pylint: disable=broad-except
             logger.error(err)
             ch.basic_reject(delivery_tag=method.delivery_tag, requeue=self.REQUEUE_ON_ALG_ERR)
-            return logger.error(f"Rejected imaging {imaging.get('_id')} with requeue={self.REQUEUE_ON_ALG_ERR}")
+
+            dead_log = f" to {Pconf.get().get('AMQP_DEAD_EXCHANGE')} exchange" if self.REQUEUE_ON_ALG_ERR else ''
+            return logger.error(f"Rejected imaging {imaging.get('_id')} with requeue={self.REQUEUE_ON_ALG_ERR}{dead_log}")
 
         try:
             routing_key = self._get_routing_key(diagnosis)
@@ -58,7 +62,9 @@ class MQOperations:
         except Exception as err: # pylint: disable=broad-except
             logger.error(err)
             ch.basic_reject(delivery_tag=method.delivery_tag, requeue=self.REQUEUE_ON_PUB_ERR)
-            return logger.error(f"Rejected imaging {imaging.get('_id')} with requeue={self.REQUEUE_ON_PUB_ERR}")
+
+            dead_log = f" to {Pconf.get().get('AMQP_DEAD_EXCHANGE')} exchange" if self.REQUEUE_ON_PUB_ERR else ''
+            return logger.error(f"Rejected imaging {imaging.get('_id')} with requeue={self.REQUEUE_ON_PUB_ERR}{dead_log}")
 
         ch.basic_ack(delivery_tag=method.delivery_tag)
         return logger.info(f"Acked imaging {imaging.get('_id')}")

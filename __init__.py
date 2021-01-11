@@ -11,6 +11,10 @@ Pconf.defaults({
     'AMQP_IN_PATTERNS': 'MRI.spine.*',
     'AMQP_OUT_EXCHANGE': 'diagnoses',
     'AMQP_OUT_EXCHANGE_TYPE': 'direct',
+    'AMQP_DEAD_EXCHANGE': 'diagnoses-error',
+    'AMQP_DEAD_EXCHANGE_TYPE': 'direct',
+    'AMQP_DEAD_QUEUE': 'diagnoses-error',
+    'AMQP_DEAD_PATTERNS': 'fracture infection pneumonia multiple_sclerosis syringomyelia stroke tumor gallbladder_disease prostate_problem synovitis',
 })
 
 from app import App # pylint: disable=wrong-import-position

@@ -20,10 +20,20 @@ class Consumer:
         logger.info(f"Cortex : connected to rabbitmq at {Pconf.get().get('AMQP_URI')}")
 
         MQ.set_up(
+            exchange=Pconf.get().get('AMQP_DEAD_EXCHANGE'),
+            exchange_type=Pconf.get().get('AMQP_DEAD_EXCHANGE_TYPE'),
+            queue=Pconf.get().get('AMQP_DEAD_QUEUE'),
+            patterns=Pconf.get().get('AMQP_DEAD_PATTERNS').split(' '),
+        )
+        MQ.set_up(
             exchange=Pconf.get().get('AMQP_IN_EXCHANGE'),
             exchange_type=Pconf.get().get('AMQP_IN_EXCHANGE_TYPE'),
             queue=Pconf.get().get('AMQP_IN_QUEUE'),
             patterns=Pconf.get().get('AMQP_IN_PATTERNS').split(' '),
+            queue_args={
+                'x-dead-letter-exchange': Pconf.get().get('AMQP_DEAD_EXCHANGE'),
+                'x-dead-letter-routing-key': Pconf.get().get('AMQP_IN_QUEUE'),
+            },
         )
         MQ.assert_exchange(
             exchange=Pconf.get().get('AMQP_OUT_EXCHANGE'),
