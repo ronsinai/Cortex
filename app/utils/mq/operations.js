@@ -1,4 +1,5 @@
 const Joi = require('joi');
+const Nconf = require('nconf');
 
 const Algorithm = require('../../algorithm');
 const { getLogger } = require('../logger');
@@ -49,7 +50,9 @@ class MQOperations {
     catch (err) {
       logger.error(err);
       this.channel.reject(msg, this.REQUEUE_ON_ALG_ERR);
-      return logger.error(`Rejected imaging ${imaging._id} with requeue=${this.REQUEUE_ON_ALG_ERR}`);
+
+      const deadLog = this.REQUEUE_ON_ALG_ERR ? ` to ${Nconf.get('AMQP_DEAD_EXCHANGE')} exchange` : '';
+      return logger.error(`Rejected imaging ${imaging._id} with requeue=${this.REQUEUE_ON_ALG_ERR}${deadLog}`);
     }
 
     try {
@@ -60,7 +63,9 @@ class MQOperations {
     catch (err) {
       logger.error(err);
       this.channel.reject(msg, this.REQUEUE_ON_PUB_ERR);
-      return logger.error(`Rejected imaging ${imaging._id} with requeue=${this.REQUEUE_ON_PUB_ERR}`);
+      
+      const deadLog = this.REQUEUE_ON_PUB_ERR ? ` to ${Nconf.get('AMQP_DEAD_EXCHANGE')} exchange` : '';
+      return logger.error(`Rejected imaging ${imaging._id} with requeue=${this.REQUEUE_ON_PUB_ERR}${deadLog}`);
     }
 
     this.channel.ack(msg);

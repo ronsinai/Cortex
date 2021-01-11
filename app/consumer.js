@@ -23,10 +23,23 @@ class App {
     logger.info(`Cortex : connected to rabbitmq at ${Nconf.get('AMQP_URI')}`);
 
     await MQ.setUp(
+      Nconf.get('AMQP_DEAD_EXCHANGE'),
+      Nconf.get('AMQP_DEAD_EXCHANGE_TYPE'),
+      Nconf.get('AMQP_DEAD_QUEUE'),
+      Nconf.get('AMQP_DEAD_PATTERNS').split(' '),
+    );
+    await MQ.setUp(
       Nconf.get('AMQP_IN_EXCHANGE'),
       Nconf.get('AMQP_IN_EXCHANGE_TYPE'),
       Nconf.get('AMQP_IN_QUEUE'),
       Nconf.get('AMQP_IN_PATTERNS').split(' '),
+      {},
+      {
+        arguments: {
+          'x-dead-letter-exchange': Nconf.get('AMQP_DEAD_EXCHANGE'),
+          'x-dead-letter-routing-key': Nconf.get('AMQP_IN_QUEUE'),
+        },
+      },
     );
     await MQ.assertExchange(
       Nconf.get('AMQP_OUT_EXCHANGE'),
