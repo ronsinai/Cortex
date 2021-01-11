@@ -25,7 +25,7 @@ class Consumer:
         MQ.bind_queue(
             queue=Pconf.get().get('AMQP_QUEUE'),
             exchange=Pconf.get().get('AMQP_EXCHANGE'),
-            patterns=Pconf.get().get('patterns'),
+            patterns=Pconf.get().get('AMQP_PATTERNS').split(' '),
         )
         logger.info(f"Cortex : connected to rabbitmq at {Pconf.get().get('AMQP_URI')}")
 
@@ -34,7 +34,7 @@ class Consumer:
         logger.info(
             f"Cortex : consuming from {Pconf.get().get('AMQP_EXCHANGE')} exchange "
             f"through {Pconf.get().get('AMQP_QUEUE')} queue "
-            f"with patterns: {Pconf.get().get('patterns')}",
+            f"with patterns: {Pconf.get().get('AMQP_PATTERNS').split(' ')}",
         )
         self.mq.consume()
 

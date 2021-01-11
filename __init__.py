@@ -9,8 +9,8 @@ Pconf.defaults({
     'AMQP_EXCHANGE': 'imagings',
     'AMQP_EXCHANGE_TYPE': 'topic',
     'AMQP_QUEUE': 'syringomyelia',
+    'AMQP_PATTERNS': 'MRI.spine.*',
 })
-Pconf.file(path='./config.json', encoding='json')
 
 from app import App # pylint: disable=wrong-import-position
 
