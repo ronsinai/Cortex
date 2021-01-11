@@ -17,24 +17,30 @@ class Consumer:
 
     def _connect_to_mq(self):
         MQ.connect(url=Pconf.get().get('AMQP_URI'))
-        MQ.assert_exchange(
-            exchange=Pconf.get().get('AMQP_EXCHANGE'),
-            exchange_type=Pconf.get().get('AMQP_EXCHANGE_TYPE'),
-        )
-        MQ.assert_queue(queue=Pconf.get().get('AMQP_QUEUE'))
-        MQ.bind_queue(
-            queue=Pconf.get().get('AMQP_QUEUE'),
-            exchange=Pconf.get().get('AMQP_EXCHANGE'),
-            patterns=Pconf.get().get('AMQP_PATTERNS').split(' '),
-        )
         logger.info(f"Cortex : connected to rabbitmq at {Pconf.get().get('AMQP_URI')}")
 
-        self.mq = MQOperations(in_queue=Pconf.get().get('AMQP_QUEUE')) # pylint: disable=attribute-defined-outside-init
+        MQ.set_up(
+            exchange=Pconf.get().get('AMQP_IN_EXCHANGE'),
+            exchange_type=Pconf.get().get('AMQP_IN_EXCHANGE_TYPE'),
+            queue=Pconf.get().get('AMQP_IN_QUEUE'),
+            patterns=Pconf.get().get('AMQP_IN_PATTERNS').split(' '),
+        )
+        MQ.set_up(
+            exchange=Pconf.get().get('AMQP_OUT_EXCHANGE'),
+            exchange_type=Pconf.get().get('AMQP_OUT_EXCHANGE_TYPE'),
+            queue=Pconf.get().get('AMQP_OUT_QUEUE'),
+            patterns=Pconf.get().get('AMQP_OUT_PATTERNS').split(' '),
+        )
+
+        self.mq = MQOperations( # pylint: disable=attribute-defined-outside-init
+            in_queue=Pconf.get().get('AMQP_IN_QUEUE'),
+            out_exchange=Pconf.get().get('AMQP_OUT_EXCHANGE'),
+        )
 
         logger.info(
-            f"Cortex : consuming from {Pconf.get().get('AMQP_EXCHANGE')} exchange "
-            f"through {Pconf.get().get('AMQP_QUEUE')} queue "
-            f"with patterns: {Pconf.get().get('AMQP_PATTERNS').split(' ')}",
+            f"Cortex : consuming from {Pconf.get().get('AMQP_IN_EXCHANGE')} exchange "
+            f"through {Pconf.get().get('AMQP_IN_QUEUE')} queue "
+            f"with patterns: {Pconf.get().get('AMQP_IN_PATTERNS').split(' ')}",
         )
         self.mq.consume()
 

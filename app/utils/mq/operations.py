@@ -1,25 +1,40 @@
 import json
+import pika
 
 from app.algorithm import Algorithm
 from app.schemas import ImagingSchema
-from app.services import DiagnosesService
 from app.utils.logger import get_logger
 from app.utils.mq import get_mq
 
 logger = get_logger()
 
 class MQOperations:
-    def __init__(self, in_queue):
+    def __init__(self, in_queue, out_exchange):
         self.channel = get_mq()
         self.algorithm = Algorithm()
-        self.diagnoses_service = DiagnosesService()
 
         self.in_queue = in_queue
+        self.out_exchange = out_exchange
 
+        self.DELIVERY_MODE = 2
         self.FETCH_COUNT = 1
         self.NO_ACK = False
         self.REQUEUE_ON_ALG_ERR = False
-        self.REQUEUE_ON_SERVE_ERR = True
+        self.REQUEUE_ON_PUB_ERR = True
+
+    @staticmethod
+    def _get_routing_key(diagnosis):
+        return f"{diagnosis.get('diagnosis')}"
+
+    def _publish(self, key, content):
+        self.channel.publish(
+            exchange=self.out_exchange,
+            routing_key=key,
+            body=json.dumps(content).encode('utf-8'),
+            properties=pika.BasicProperties(
+                delivery_mode=self.DELIVERY_MODE,
+            ),
+        )
 
     def _msg_handler(self, ch, method, _properties, body):
         imaging = {}
@@ -37,11 +52,13 @@ class MQOperations:
             return logger.error(f"Rejected imaging {imaging.get('_id')} with requeue={self.REQUEUE_ON_ALG_ERR}")
 
         try:
-            self.diagnoses_service.post(diagnosis)
+            routing_key = self._get_routing_key(diagnosis)
+            self._publish(routing_key, diagnosis)
+            logger.info(f"Published {diagnosis.get('diagnosis')} diagnosis of imaging {imaging.get('_id')} to {self.out_exchange} exchange")
         except Exception as err: # pylint: disable=broad-except
             logger.error(err)
-            ch.basic_reject(delivery_tag=method.delivery_tag, requeue=self.REQUEUE_ON_SERVE_ERR)
-            return logger.error(f"Rejected imaging {imaging.get('_id')} with requeue={self.REQUEUE_ON_SERVE_ERR}")
+            ch.basic_reject(delivery_tag=method.delivery_tag, requeue=self.REQUEUE_ON_PUB_ERR)
+            return logger.error(f"Rejected imaging {imaging.get('_id')} with requeue={self.REQUEUE_ON_PUB_ERR}")
 
         ch.basic_ack(delivery_tag=method.delivery_tag)
         return logger.info(f"Acked imaging {imaging.get('_id')}")

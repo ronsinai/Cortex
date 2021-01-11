@@ -2,7 +2,7 @@ from operator import itemgetter
 
 from pconf import Pconf
 
-from app.schemas import ImagingSchema
+from app.schemas import DiagnosisSchema, ImagingSchema
 from app.utils.logger import get_logger
 
 logger = get_logger()
@@ -16,8 +16,9 @@ class Diagnoser:
             age, sex = itemgetter('age', 'sex')(metadata)
             logger.info(f"Diagnosing imaging {_id} of {bodyPart} {type_} of {age}y {sex} at {path}")
 
-            diagnosis = {'imagingId': _id, 'imagingType': type_, 'diagnosis': Pconf.get().get('AMQP_QUEUE')}
-            logger.info(f"Diagnosed imaging {_id} with {Pconf.get().get('AMQP_QUEUE')}")
+            diagnosis = {'imagingId': _id, 'imagingType': type_, 'diagnosis': Pconf.get().get('AMQP_IN_QUEUE')}
+            DiagnosisSchema().load(diagnosis)
+            logger.info(f"Diagnosed imaging {_id} with {Pconf.get().get('AMQP_IN_QUEUE')}")
             return diagnosis
 
         except Exception as err:

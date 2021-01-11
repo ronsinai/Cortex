@@ -4,12 +4,15 @@ Pconf.env()
 Pconf.defaults({
     'PYTHON_ENV': 'dev',
     'LOG_LEVEL': 'info',
-    'ELEF_URI': 'http://localhost:1995',
     'AMQP_URI': 'amqp://localhost:5672',
-    'AMQP_EXCHANGE': 'imagings',
-    'AMQP_EXCHANGE_TYPE': 'topic',
-    'AMQP_QUEUE': 'syringomyelia',
-    'AMQP_PATTERNS': 'MRI.spine.*',
+    'AMQP_IN_EXCHANGE': 'imagings',
+    'AMQP_IN_EXCHANGE_TYPE': 'topic',
+    'AMQP_IN_QUEUE': 'syringomyelia',
+    'AMQP_IN_PATTERNS': 'MRI.spine.*',
+    'AMQP_OUT_EXCHANGE': 'diagnoses',
+    'AMQP_OUT_EXCHANGE_TYPE': 'direct',
+    'AMQP_OUT_QUEUE': 'diagnoses',
+    'AMQP_OUT_PATTERNS': 'fracture infection pneumonia multiple_sclerosis syringomyelia stroke tumor gallbladder_disease prostate_problem synovitis',
 })
 
 from app import App # pylint: disable=wrong-import-position

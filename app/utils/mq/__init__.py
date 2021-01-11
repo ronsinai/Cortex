@@ -23,6 +23,11 @@ def bind_queue(queue, exchange, patterns):
     for pattern in patterns:
         channel.queue_bind(queue=queue, exchange=exchange, routing_key=pattern)
 
+def set_up(exchange, exchange_type, queue, patterns):
+    assert_exchange(exchange, exchange_type)
+    assert_queue(queue)
+    bind_queue(queue, exchange, patterns)
+
 def close():
     if channel:
         channel.close()
