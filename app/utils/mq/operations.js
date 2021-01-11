@@ -1,7 +1,6 @@
 const Joi = require('joi');
 
 const Algorithm = require('../../algorithm');
-const { DiagnosesService } = require('../../services');
 const { getLogger } = require('../logger');
 const { getMQ } = require('.');
 const { imagingSchema } = require('../../schemas');
@@ -9,17 +8,31 @@ const { imagingSchema } = require('../../schemas');
 const logger = getLogger();
 
 class MQOperations {
-  constructor(inQueue) {
+  constructor(inQueue, outExchange, options = {}) {
     this.channel = getMQ();
     this.algorithm = new Algorithm();
-    this.diagnosesService = new DiagnosesService();
 
     this.inQueue = inQueue;
+    this.outExchange = outExchange;
 
+    this.PERSISTENT = true;
     this.FETCH_COUNT = 1;
     this.NO_ACK = false;
     this.REQUEUE_ON_ALG_ERR = false;
-    this.REQUEUE_ON_SERVE_ERR = true;
+    this.REQUEUE_ON_PUB_ERR = true;
+
+    this.options = options;
+    this.options.persistent = this.PERSISTENT;
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  _getRoutingKey(diagnosis) {
+    return `${diagnosis.diagnosis}`;
+  }
+
+  async _publish(key, content) {
+    // eslint-disable-next-line max-len
+    await this.channel.publish(this.outExchange, key, Buffer.from(JSON.stringify(content)), this.persistent);
   }
 
   async _msgHandler(msg) {
@@ -40,12 +53,14 @@ class MQOperations {
     }
 
     try {
-      await this.diagnosesService.post(diagnosis);
+      const routingKey = this._getRoutingKey(diagnosis);
+      await this._publish(routingKey, diagnosis);
+      logger.info(`Published ${diagnosis.diagnosis} diagnosis of imaging ${imaging._id} to ${this.outExchange} exchange`);
     }
     catch (err) {
       logger.error(err);
-      this.channel.reject(msg, this.REQUEUE_ON_SERVE_ERR);
-      return logger.error(`Rejected imaging ${imaging._id} with requeue=${this.REQUEUE_ON_SERVE_ERR}`);
+      this.channel.reject(msg, this.REQUEUE_ON_PUB_ERR);
+      return logger.error(`Rejected imaging ${imaging._id} with requeue=${this.REQUEUE_ON_PUB_ERR}`);
     }
 
     this.channel.ack(msg);

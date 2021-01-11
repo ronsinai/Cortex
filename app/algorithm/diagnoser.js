@@ -2,7 +2,7 @@ const Joi = require('joi');
 const Nconf = require('nconf');
 
 const { getLogger } = require('../utils/logger');
-const { imagingSchema } = require('../schemas');
+const { diagnosisSchema, imagingSchema } = require('../schemas');
 
 const logger = getLogger();
 
@@ -16,8 +16,9 @@ class Diagnoser {
       const { age, sex } = metadata;
       logger.info(`Diagnosing imaging ${_id} of ${bodyPart} ${type} of ${age}y ${sex} at ${path}`);
 
-      const diagnosis = { imagingId: _id, imagingType: type, diagnosis: Nconf.get('AMQP_QUEUE') };
-      logger.info(`Diagnosed imaging ${_id} with ${Nconf.get('AMQP_QUEUE')}`);
+      const diagnosis = { imagingId: _id, imagingType: type, diagnosis: Nconf.get('AMQP_IN_QUEUE') };
+      Joi.assert(diagnosis, diagnosisSchema);
+      logger.info(`Diagnosed imaging ${_id} with ${Nconf.get('AMQP_IN_QUEUE')}`);
       return diagnosis;
     }
     catch (err) {

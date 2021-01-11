@@ -32,6 +32,13 @@ const bindQueue = async (queue, exchange, patterns) => {
   );
 };
 
+// eslint-disable-next-line max-len
+const setUp = async (exchange, exchangeType, queue, patterns, exchangeOptions = {}, queueOptions = {}) => {
+  await assertExchange(exchange, exchangeType, exchangeOptions);
+  await assertQueue(queue, queueOptions);
+  await bindQueue(queue, exchange, patterns);
+};
+
 const close = async () => {
   await channel.close();
   await connection.close();
@@ -44,6 +51,7 @@ module.exports = {
   assertExchange,
   assertQueue,
   bindQueue,
+  setUp,
   close,
   getMQ,
 };

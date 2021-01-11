@@ -4,12 +4,15 @@ Nconf.use('memory');
 Nconf.argv().env().defaults({
   NODE_ENV: 'test',
   LOG_LEVEL: 'silent',
-  ELEF_URI: 'http://localhost:1995',
   AMQP_URI: 'amqp://localhost:5672',
-  AMQP_EXCHANGE: 'test_imagings',
-  AMQP_EXCHANGE_TYPE: 'topic',
-  AMQP_QUEUE: 'test_syringomyelia',
-  AMQP_PATTERNS: 'MRI.spine.*',
+  AMQP_IN_EXCHANGE: 'test_imagings',
+  AMQP_IN_EXCHANGE_TYPE: 'topic',
+  AMQP_IN_QUEUE: 'test_syringomyelia',
+  AMQP_IN_PATTERNS: 'MRI.spine.*',
+  AMQP_OUT_EXCHANGE: 'test_diagnoses',
+  AMQP_OUT_EXCHANGE_TYPE: 'direct',
+  AMQP_OUT_QUEUE: 'test_diagnoses',
+  AMQP_OUT_PATTERNS: 'fracture infection pneumonia multiple_sclerosis syringomyelia stroke tumor gallbladder_disease prostate_problem synovitis',
 });
 
 const Consumer = require('../app');
