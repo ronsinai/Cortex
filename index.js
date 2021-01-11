@@ -10,7 +10,8 @@ Nconf.argv().env().defaults({
   AMQP_EXCHANGE: 'imagings',
   AMQP_EXCHANGE_TYPE: 'topic',
   AMQP_QUEUE: 'syringomyelia',
-}).file({ file: './config.json' });
+  AMQP_PATTERNS: 'MRI.spine.*',
+});
 
 const App = require('./app');
 
