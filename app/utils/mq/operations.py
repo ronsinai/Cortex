@@ -1,7 +1,7 @@
 import json
 
+import aiormq
 from pconf import Pconf
-import pika
 
 from app.algorithm import Algorithm
 from app.schemas import ImagingSchema
@@ -28,52 +28,47 @@ class MQOperations:
     def _get_routing_key(diagnosis):
         return f"{diagnosis.get('diagnosis')}"
 
-    def _publish(self, key, content):
-        self.channel.publish(
+    async def _publish(self, key, content):
+        await self.channel.basic_publish(
             exchange=self.out_exchange,
             routing_key=key,
             body=json.dumps(content).encode('utf-8'),
-            properties=pika.BasicProperties(
+            properties=aiormq.spec.Basic.Properties(
                 delivery_mode=self.DELIVERY_MODE,
             ),
         )
 
-    def _msg_handler(self, ch, method, _properties, body):
+    async def _msg_handler(self, message):
         imaging = {}
         diagnosis = {}
 
         try:
-            imaging = json.loads(body.decode('utf-8'))
+            imaging = json.loads(message.body.decode('utf-8'))
             ImagingSchema().load(imaging)
             logger.info(f"Consumed imaging {imaging.get('_id')}")
 
             diagnosis = self.algorithm.run(imaging)
         except Exception as err: # pylint: disable=broad-except
             logger.error(err)
-            ch.basic_reject(delivery_tag=method.delivery_tag, requeue=self.REQUEUE_ON_ALG_ERR)
-
+            await self.channel.basic_reject(delivery_tag=message.delivery.delivery_tag, requeue=self.REQUEUE_ON_ALG_ERR)
+            
             dead_log = f" to {Pconf.get().get('AMQP_DEAD_EXCHANGE')} exchange" if self.REQUEUE_ON_ALG_ERR else ''
             return logger.error(f"Rejected imaging {imaging.get('_id')} with requeue={self.REQUEUE_ON_ALG_ERR}{dead_log}")
 
         try:
             routing_key = self._get_routing_key(diagnosis)
-            self._publish(routing_key, diagnosis)
+            await self._publish(routing_key, diagnosis)
             logger.info(f"Published {diagnosis.get('diagnosis')} diagnosis of imaging {imaging.get('_id')} to {self.out_exchange} exchange")
         except Exception as err: # pylint: disable=broad-except
             logger.error(err)
-            ch.basic_reject(delivery_tag=method.delivery_tag, requeue=self.REQUEUE_ON_PUB_ERR)
-
+            await self.channel.basic_reject(delivery_tag=message.delivery.delivery_tag, requeue=self.REQUEUE_ON_PUB_ERR)
+            
             dead_log = f" to {Pconf.get().get('AMQP_DEAD_EXCHANGE')} exchange" if self.REQUEUE_ON_PUB_ERR else ''
             return logger.error(f"Rejected imaging {imaging.get('_id')} with requeue={self.REQUEUE_ON_PUB_ERR}{dead_log}")
 
-        ch.basic_ack(delivery_tag=method.delivery_tag)
+        await self.channel.basic_ack(delivery_tag=message.delivery.delivery_tag)
         return logger.info(f"Acked imaging {imaging.get('_id')}")
 
-    def consume(self):
-        self.channel.basic_qos(prefetch_count=self.FETCH_COUNT)
-
-        self.channel.basic_consume(queue=self.in_queue, on_message_callback=self._msg_handler)
-        self.channel.start_consuming()
-
-    def stop(self):
-        self.channel.stop_consuming()
+    async def consume(self):
+        await self.channel.basic_qos(prefetch_count=self.FETCH_COUNT)
+        await self.channel.basic_consume(queue=self.in_queue, consumer_callback=self._msg_handler)

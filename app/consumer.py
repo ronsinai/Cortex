@@ -7,23 +7,22 @@ from app.utils.mq.operations import MQOperations
 logger = get_logger()
 
 class Consumer:
-    def start(self):
+    async def start(self):
         try:
-            self.mq = None
-            self._connect_to_mq()
+            await self._connect_to_mq()
         except Exception as err:
             logger.error(err)
             raise err
 
-    def _connect_to_mq(self):
-        MQ.connect(url=Pconf.get().get('AMQP_URI'))
+    async def _connect_to_mq(self):
+        await MQ.connect(url=Pconf.get().get('AMQP_URI'))
         logger.info(f"Cortex : connected to rabbitmq at {Pconf.get().get('AMQP_URI')}")
 
-        MQ.assert_exchange(
+        await MQ.assert_exchange(
             exchange=Pconf.get().get('AMQP_DEAD_EXCHANGE'),
             exchange_type=Pconf.get().get('AMQP_DEAD_EXCHANGE_TYPE'),
         )
-        MQ.set_up(
+        await MQ.set_up(
             exchange=Pconf.get().get('AMQP_IN_EXCHANGE'),
             exchange_type=Pconf.get().get('AMQP_IN_EXCHANGE_TYPE'),
             queue=Pconf.get().get('AMQP_IN_QUEUE'),
@@ -33,7 +32,7 @@ class Consumer:
                 'x-dead-letter-routing-key': Pconf.get().get('AMQP_IN_QUEUE'),
             },
         )
-        MQ.assert_exchange(
+        await MQ.assert_exchange(
             exchange=Pconf.get().get('AMQP_OUT_EXCHANGE'),
             exchange_type=Pconf.get().get('AMQP_OUT_EXCHANGE_TYPE'),
         )
@@ -48,17 +47,16 @@ class Consumer:
             f"through {Pconf.get().get('AMQP_IN_QUEUE')} queue "
             f"with patterns: {Pconf.get().get('AMQP_IN_PATTERNS').split(' ')}",
         )
-        self.mq.consume()
+        await self.mq.consume()
 
-    def _close_mq_connection(self):
-        if self.mq:
-            self.mq.stop()
-        MQ.close()
+    @staticmethod
+    async def _close_mq_connection():
+        await MQ.close()
         logger.info(f"Cortex : disconnected from rabbitmq at {Pconf.get().get('AMQP_URI')}")
 
-    def stop(self):
+    async def stop(self):
         try:
-            self._close_mq_connection()
+            await self._close_mq_connection()
         except Exception as err:
             logger.error(err)
             raise err

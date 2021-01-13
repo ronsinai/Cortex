@@ -1,3 +1,6 @@
+import asyncio
+import signal
+
 from pconf import Pconf
 
 Pconf.env()
@@ -17,11 +20,25 @@ Pconf.defaults({
 
 from app import App # pylint: disable=wrong-import-position
 
-app_instance = App()
+def shutdown(_signal, loop): # pylint: disable=redefined-outer-name
+    loop.stop()
 
-try:
-    app_instance.start()
-except KeyboardInterrupt:
-    app_instance.stop()
-except Exception as err: # pylint: disable=broad-except
-    app_instance.stop()
+def main():
+    app_instance = App()
+    loop = asyncio.get_event_loop()
+
+    signals = (signal.SIGHUP, signal.SIGTERM, signal.SIGINT)
+    for s in signals:
+        loop.add_signal_handler(s, lambda s=s: shutdown(s, loop))
+
+    try:
+        loop.run_until_complete(app_instance.start())
+        loop.run_forever()
+    except: # pylint: disable=bare-except
+        pass
+    finally:
+        loop.run_until_complete(app_instance.stop())
+        loop.close()
+
+if __name__ == '__main__':
+    main()

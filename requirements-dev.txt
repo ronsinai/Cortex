@@ -1,12 +1,15 @@
+aiormq==3.3.1
 astroid==2.4.2
 certifi==2020.12.5
 deepmerge==0.1.1
+idna==3.1
 isort==5.7.0
 lazy-object-proxy==1.4.3
 marshmallow==3.10.0
 mccabe==0.6.1
+multidict==5.1.0
+pamqp==2.3.0
 pconf==1.7.2
-pika==1.1.0
 pino==0.6.0
 pylint==2.6.0
 PyYAML==5.3.1
@@ -14,4 +17,6 @@ six==1.15.0
 style==1.1.6
 toml==0.10.2
 typed-ast==1.4.2
+typing-extensions==3.7.4.3
 wrapt==1.12.1
+yarl==1.6.3
