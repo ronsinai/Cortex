@@ -12,8 +12,6 @@ Nconf.argv().env().defaults({
   AMQP_IN_PATTERNS: 'MRI.spine.*',
   AMQP_OUT_EXCHANGE: 'diagnoses',
   AMQP_OUT_EXCHANGE_TYPE: 'direct',
-  AMQP_OUT_QUEUE: 'diagnoses',
-  AMQP_OUT_PATTERNS: 'fracture infection pneumonia multiple_sclerosis syringomyelia stroke tumor gallbladder_disease prostate_problem synovitis',
 });
 
 const App = require('./app');
