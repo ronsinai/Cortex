@@ -14,8 +14,6 @@ Nconf.argv().env().defaults({
   AMQP_OUT_EXCHANGE_TYPE: 'direct',
   AMQP_DEAD_EXCHANGE: 'diagnoses-error',
   AMQP_DEAD_EXCHANGE_TYPE: 'direct',
-  AMQP_DEAD_QUEUE: 'diagnoses-error',
-  AMQP_DEAD_PATTERNS: 'fracture infection pneumonia multiple_sclerosis syringomyelia stroke tumor gallbladder_disease prostate_problem synovitis',
 });
 
 const App = require('./app');
