@@ -19,11 +19,9 @@ class Consumer:
         MQ.connect(url=Pconf.get().get('AMQP_URI'))
         logger.info(f"Cortex : connected to rabbitmq at {Pconf.get().get('AMQP_URI')}")
 
-        MQ.set_up(
+        MQ.assert_exchange(
             exchange=Pconf.get().get('AMQP_DEAD_EXCHANGE'),
             exchange_type=Pconf.get().get('AMQP_DEAD_EXCHANGE_TYPE'),
-            queue=Pconf.get().get('AMQP_DEAD_QUEUE'),
-            patterns=Pconf.get().get('AMQP_DEAD_PATTERNS').split(' '),
         )
         MQ.set_up(
             exchange=Pconf.get().get('AMQP_IN_EXCHANGE'),
