@@ -25,11 +25,9 @@ class Consumer:
             queue=Pconf.get().get('AMQP_IN_QUEUE'),
             patterns=Pconf.get().get('AMQP_IN_PATTERNS').split(' '),
         )
-        MQ.set_up(
+        MQ.assert_exchange(
             exchange=Pconf.get().get('AMQP_OUT_EXCHANGE'),
             exchange_type=Pconf.get().get('AMQP_OUT_EXCHANGE_TYPE'),
-            queue=Pconf.get().get('AMQP_OUT_QUEUE'),
-            patterns=Pconf.get().get('AMQP_OUT_PATTERNS').split(' '),
         )
 
         self.mq = MQOperations( # pylint: disable=attribute-defined-outside-init
