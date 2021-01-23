@@ -2,6 +2,9 @@ import asyncio
 import signal
 
 from pconf import Pconf
+import uvloop
+
+uvloop.install()
 
 Pconf.env()
 Pconf.defaults({
