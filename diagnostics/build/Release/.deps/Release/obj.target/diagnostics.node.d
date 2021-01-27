@@ -1,0 +1,1 @@
+cmd_Release/obj.target/diagnostics.node := g++ -o Release/obj.target/diagnostics.node -shared -pthread -rdynamic -m64  -Wl,-soname=diagnostics.node -Wl,--start-group Release/obj.target/diagnostics/index.o Release/obj.target/diagnostics/src/diagnose.o Release/obj.target/node_modules/node-addon-api/nothing.a -Wl,--end-group 
